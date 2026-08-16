@@ -58,21 +58,26 @@ python3 -m http.server 8080
 
 体验版使用**相对路径 + hash 路由**，因此放在任何子路径下都能正常工作。
 
-**方案 A：发布到 `decli.github.io/ems`（用户要求的地址）**
+**方案 A：`decli.github.io/ems`（当前线上采用）**
 
-需要仓库名为 `ems`，或放在用户主页仓库的子目录：
+已部署在主页仓库 `decli/decli.github.io` 的 `ems/` 子目录下。
+
+> ⚠️ **同步时只复制 `assets/`，不要覆盖 `ems/index.html`。**
+> 线上那份 `ems/index.html` 由主页仓库维护，里面额外注入了站点级的
+> Google Analytics 片段（与门户及 `/ftms/` 共用同一个 property）。
+> 整个目录覆盖过去会把它抹掉，而且不会有任何报错提示。
 
 ```bash
-# 做法一：把本仓库改名为 ems（Settings → General → Repository name）
-#         之后 Settings → Pages → Source 选 "GitHub Actions" 或 "Deploy from a branch: main / (root)"
-#         访问 https://decli.github.io/ems
-
-# 做法二：复制到主页仓库的 ems/ 子目录
 git clone https://github.com/decli/decli.github.io.git
-cp -r index.html assets .nojekyll decli.github.io/ems/
-cd decli.github.io && git add ems && git commit -m "add EMS demo" && git push
-# 访问 https://decli.github.io/ems
+rsync -a --delete assets/ decli.github.io/ems/assets/     # 只同步 assets
+cd decli.github.io && git add ems && git commit -m "sync EMS demo" && git push
 ```
+
+若确实改动了本仓库的 `index.html`（改标题、meta 等），需要手工把改动**合并**进
+线上那份，而不是整份替换 —— 否则 GA 片段会丢。
+
+另一种做法是把本仓库直接改名为 `ems` 并开启 Pages，就不存在两份 `index.html`
+需要同步的问题（Settings → General → Repository name）。
 
 **方案 B：直接用当前仓库名发布**
 
